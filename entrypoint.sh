@@ -94,4 +94,4 @@ echo "[entrypoint] Starting FastAPI on port 8000..."
 echo "========================================================"
 echo ""
 
-exec uvicorn api:app --host 0.0.0.0 --port 8000 --workers 4
+exec uvicorn api:app --host 0.0.0.0 --port 8000 --workers 1

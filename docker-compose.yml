@@ -46,7 +46,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 90s    # allow time for asset download on first run
+      start_period: 120s    # allow time for model loading on first run
 
     # Resource limits (adjust to your host)
     deploy:

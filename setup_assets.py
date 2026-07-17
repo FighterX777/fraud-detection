@@ -201,7 +201,7 @@ def run(targets: list[str]) -> None:
             sys.exit(1)
 
     print(f"\n{'='*60}")
-    print("  Setup finished. You can now run:  streamlit run app.py")
+    print("  Setup finished. You can now run:  uvicorn api:app --host 0.0.0.0 --port 8000")
     print(f"{'='*60}\n")
 
 

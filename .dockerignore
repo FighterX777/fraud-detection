@@ -1,0 +1,66 @@
+# ============================================================
+# .dockerignore
+# Excludes files that should NOT be copied into the Docker image.
+# Keeps the image small and the build fast.
+# ============================================================
+
+# ── Python virtual environment (always exclude) ───────────────
+venv/
+.venv/
+env/
+.env/
+
+# ── Python cache ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── Trained model weights (downloaded at runtime via setup_assets.py)
+# Remove these lines if you want to BAKE the models into the image.
+models/*.pkl
+models/*.ubj
+models/*.pt
+models/distilbert_fraud/
+
+# ── Raw / processed datasets (large, not needed in image) ────
+data/raw/
+data/processed/
+
+# ── Plots and evaluation outputs ─────────────────────────────
+plots/
+*.png
+*.jpg
+*.jpeg
+
+# ── Git ───────────────────────────────────────────────────────
+.git/
+.gitignore
+.gitattributes
+
+# ── Development + debug files ────────────────────────────────
+debug_model.py
+*.ipynb
+.ipynb_checkpoints/
+notebooks/
+
+# ── IDE / editor ─────────────────────────────────────────────
+.vscode/
+.idea/
+*.code-workspace
+
+# ── OS junk ───────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Docker files themselves (no recursion) ────────────────────
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# ── Temp / zip downloads ──────────────────────────────────────
+*.zip
+*.tar.gz
+*.tar.bz2

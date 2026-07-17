@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Fraud Guard</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-section">
+                <div class="sidebar-icon" style="background:transparent; font-size:1.8rem; padding:0; width:auto;">🛡️</div>
+                <h1>Financial Fraud Detection</h1>
+            </div>
+
+            <nav class="nav-menu" style="margin-bottom: 2rem;">
+                <button class="btn btn-outline active" style="text-align:left; border:none; padding:0.5rem; background:rgba(37, 99, 235, 0.1); color:var(--primary); font-weight:700;" data-tab="tab-ml">💳 Transaction Data</button>
+                <button class="btn btn-outline" style="text-align:left; border:none; padding:0.5rem;" data-tab="tab-nlp">💬 Text Analysis</button>
+                <button class="btn btn-outline" style="text-align:left; border:none; padding:0.5rem;" data-tab="tab-cv">✍️ Signature Check</button>
+            </nav>
+
+            <div class="module-list">
+                <div class="module-list-header">Active Modules</div>
+                
+                <div class="sidebar-card">
+                    <div class="sidebar-card-left">
+                        <div class="sidebar-icon">📊</div>
+                        <div>
+                            <h4>ML Module</h4>
+                            <p>XGBoost Classifier</p>
+                        </div>
+                    </div>
+                    <div class="badge-ready">Ready</div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-card-left">
+                        <div class="sidebar-icon" style="color:#d84315; background:#fbe9e7;">💬</div>
+                        <div>
+                            <h4>NLP Module</h4>
+                            <p>DistilBERT</p>
+                        </div>
+                    </div>
+                    <div class="badge-ready">Ready</div>
+                </div>
+
+                <div class="sidebar-card">
+                    <div class="sidebar-card-left">
+                        <div class="sidebar-icon" style="color:#2e7d32; background:#e8f5e9;">✍️</div>
+                        <div>
+                            <h4>CV Module</h4>
+                            <p>Siamese ResNet18</p>
+                        </div>
+                    </div>
+                    <div class="badge-ready">Ready</div>
+                </div>
+            </div>
+
+
+
+            <div style="margin-top:auto; font-size:0.65rem; color:var(--text-muted); line-height:1.6;">
+                ML → XGBoost (ULB Credit Card dataset)<br>
+                NLP → DistilBERT fine-tuned (SMS + Email)<br>
+                CV → Siamese ResNet18 (CEDAR Signatures)<br>
+                <strong style="color:var(--primary);">Powered by FastAPI + Uvicorn</strong>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header>
+                <div>
+                    <h2>Financial Fraud Detection System</h2>
+                    <p>Multi-modal AI · XGBoost · DistilBERT · Siamese ResNet18</p>
+                </div>
+                <div class="btn-pill">
+                    ⚙️ FastAPI + Uvicorn
+                </div>
+            </header>
+
+            <!-- TAB 1: ML -->
+            <section id="tab-ml" class="tab-pane active">
+                <div class="metric-card mb">
+                    <h3 class="card-title">💳 Transaction Parameters</h3>
+                    <p class="card-desc" style="font-size:0.8rem;">Enter the 30 ULB-format features</p>
+                </div>
+
+                <div class="card">
+                    <form id="ml-form">
+                        <div class="inputs-grid mb" style="grid-template-columns: repeat(2, 1fr);">
+                            <div class="input-group">
+                                <label for="f-amount" style="font-weight:600; font-size:0.75rem;">AMOUNT (EUR)</label>
+                                <input type="number" id="f-amount" min="0" max="100000" value="0" step="0.01" class="text-input" required>
+                            </div>
+                            <div class="input-group">
+                                <label for="f-time" style="font-weight:600; font-size:0.75rem;">TIME (SECONDS SINCE FIRST TXN)</label>
+                                <input type="number" id="f-time" min="0" max="172792" value="406" step="1" class="text-input" required>
+                            </div>
+                        </div>
+
+                        <div style="display:flex; justify-content:space-between; margin-bottom: 0.5rem; align-items:flex-end;">
+                            <label style="font-weight:600; font-size:0.75rem; color:var(--text-muted);">PCA FEATURES — V1 TO V28</label>
+                            <span style="font-size:0.7rem; color:var(--text-muted);">Tip: V14 = -5, V17 = -3, V4 = +3 simulates a real fraud signature</span>
+                        </div>
+                        <div class="pca-grid" id="pca-sliders-container">
+                            <!-- Sliders generated by JS -->
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt mb">🔍 Analyze Transaction</button>
+                    </form>
+                    
+                    <hr style="border-color: rgba(99, 102, 241, 0.2); margin: 2rem 0;">
+
+                    <div>
+                        <h4 style="font-size:0.85rem; color:var(--text-muted); margin-bottom: 0.5rem; text-transform:uppercase;">Load Real ULB Dataset Sample</h4>
+                        
+                        <div style="margin-bottom:1rem;">
+                            <strong style="color:#ef4444; font-size:0.8rem;">🚨 FRAUD PATTERNS</strong>
+                            <div class="preset-buttons" style="margin-top:0.4rem;">
+                                <button type="button" class="btn btn-fraud-preset" id="preset-fraud-a">🚨 Fraud A — Card-Not-Present (€0)</button>
+                                <button type="button" class="btn btn-fraud-preset" id="preset-fraud-b">🚨 Fraud B — High Value (€529)</button>
+                                <button type="button" class="btn btn-fraud-preset" id="preset-fraud-c">🚨 Fraud C — Micro Transaction (€1.98)</button>
+                                <button type="button" class="btn btn-fraud-preset" id="preset-fraud-d">🚨 Fraud D — Wire Transfer (€8,900)</button>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <strong style="color:#10b981; font-size:0.8rem;">✅ LEGITIMATE PATTERNS</strong>
+                            <div class="preset-buttons" style="margin-top:0.4rem;">
+                                <button type="button" class="btn btn-legit-preset" id="preset-legit-a">✅ Normal — Everyday Purchase (€49.95)</button>
+                                <button type="button" class="btn btn-legit-preset" id="preset-legit-b">✅ Normal — Salary / Large (€3,200)</button>
+                                <button type="button" class="btn btn-legit-preset" id="preset-legit-c">✅ Normal — Contactless (€4.50)</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Global Loading Overlay -->
+            <div id="loading-overlay" class="loading-overlay hidden">
+                <div class="spinner"></div>
+                <p id="loading-text">Analyzing...</p>
+            </div>
+
+            <!-- TAB 2: NLP -->
+            <section id="tab-nlp" class="tab-pane">
+                <div class="card">
+                    <h3 class="card-title">Phishing & Fraud Text Detector</h3>
+                    <p class="card-desc">Paste any SMS, email body, or transaction note. DistilBERT will analyze it.</p>
+                    
+                    <form id="nlp-form">
+                        <textarea id="nlp-text" rows="6" placeholder="Your account has been suspended..."></textarea>
+                        
+                        <div class="presets mt">
+                            <strong>Quick Examples:</strong>
+                            <div class="preset-buttons">
+                                <button type="button" class="btn btn-outline preset-phish">🚨 Phish 1 (Bank)</button>
+                                <button type="button" class="btn btn-outline preset-phish2">🚨 Phish 2 (Walmart)</button>
+                                <button type="button" class="btn btn-outline preset-legit">✅ Legit 1 (Amazon)</button>
+                                <button type="button" class="btn btn-outline preset-legit2">✅ Legit 2 (Lunch)</button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary mt">🔍 Analyze Text</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- TAB 3: CV -->
+            <section id="tab-cv" class="tab-pane">
+                <div class="card">
+                    <h3 class="card-title">Signature Verification</h3>
+                    <p class="card-desc">Upload a genuine reference signature and a test signature to compare.</p>
+                    
+                    <form id="cv-form">
+                        <div class="upload-grid">
+                            <div class="upload-box">
+                                <label for="ref-img">Genuine Reference Image</label>
+                                <input type="file" id="ref-img" accept="image/*" required>
+                            </div>
+                            <div class="upload-box">
+                                <label for="test-img">Test Image</label>
+                                <input type="file" id="test-img" accept="image/*" required>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt">🔍 Verify Signature</button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Results Section (Hidden initially) -->
+            <section id="results-pane" class="results-pane hidden">
+                <!-- Injected by app.js -->
+            </section>
+
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

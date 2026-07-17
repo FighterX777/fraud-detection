@@ -1,0 +1,64 @@
+# ============================================================
+# docker-compose.yml
+# AI-Powered Financial Fraud Detection System
+#
+# Usage:
+#   1. Fill in the MODELS_GDRIVE_URL below (and DATA_GDRIVE_URL
+#      if you also want the data folder).
+#   2. docker compose up --build
+#   3. Open http://localhost:8000
+# ============================================================
+
+services:
+  fraud-detection:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: ai-fraud-guard:latest
+    container_name: ai-fraud-guard
+
+    ports:
+      - "8000:8000"
+
+    environment:
+      # ── Google Drive asset URLs ───────────────────────────────
+      # Paste your share URLs here (or set as shell env vars before
+      # running docker compose up, e.g. export MODELS_GDRIVE_URL=...)
+      MODELS_GDRIVE_URL: "https://drive.google.com/file/d/1m-82bqvhosy8sZCjXA3Q1F0mfRkDGMl_/view?usp=sharing"
+      DATA_GDRIVE_URL: ""    # leave empty to skip data download
+
+      # ── Asset download mode ───────────────────────────────────
+      # "--models-only"  : only models (enough for the dashboard)
+      # ""               : both models + data
+      SETUP_ASSETS_ARGS: "--models-only"
+
+    volumes:
+      # Mount models + data as persistent volumes so they survive
+      # container restarts without re-downloading.
+      - fraud_models:/app/models
+      - fraud_data:/app/data
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 90s    # allow time for asset download on first run
+
+    # Resource limits (adjust to your host)
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
+
+# ── Named volumes (persistent across restarts) ────────────────
+volumes:
+  fraud_models:
+    name: fraud_models
+  fraud_data:
+    name: fraud_data

@@ -11,7 +11,7 @@
 **Multi-modal financial fraud detection combining Machine Learning, Natural Language Processing,
 and Computer Vision into a unified real-time analysis dashboard.**
 
-Access it live on [this link](https://primary-margie-test-bot-653e6beb.koyeb.app/) 
+Access it live on [this link](https://compact-brigitte-test-bot-fc0e52e5.koyeb.app/) 
 
 [🚀 Quick Start](#️-quick-start) · [📦 Pre-trained Assets](#-pre-trained-assets-google-drive) · [🏗️ Architecture](#️-system-architecture) · [📊 Results](#-evaluation-results) · [🖥️ Dashboard](#️-fastapi-dashboard)
 

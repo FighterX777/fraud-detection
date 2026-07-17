@@ -26,7 +26,7 @@ global_models = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Load ML models
+    # Load ML model only at startup (small, fast)
     try:
         logger.info("Loading XGBoost ML model...")
         global_models["ml"] = load_model("models/xgboost_fraud.ubj")
@@ -39,39 +39,47 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error(f"Failed to load ML model: {e}")
 
-    # Load NLP model
-    try:
-        logger.info("Loading DistilBERT NLP model...")
-        from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
-        model_path = "models/distilbert_fraud"
-        if os.path.isdir(model_path):
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            tokenizer = DistilBertTokenizer.from_pretrained(model_path)
-            model = DistilBertForSequenceClassification.from_pretrained(model_path)
-            model = model.to(device)
-            model.eval()
-            global_models["nlp"] = (model, tokenizer)
-    except Exception as e:
-        logger.error(f"Failed to load NLP model: {e}")
-
-    # Load CV model
-    try:
-        logger.info("Loading SiameseResNet CV model...")
-        cv_path = "models/siamese_resnet18.pt"
-        if os.path.exists(cv_path):
-            device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-            model = SiameseResNet(embedding_dim=EMBEDDING_DIM)
-            model.load_state_dict(torch.load(cv_path, map_location=device))
-            model = model.to(device)
-            model.eval()
-            global_models["cv"] = model
-    except Exception as e:
-        logger.error(f"Failed to load CV model: {e}")
-
-    logger.info("Server started successfully.")
+    logger.info("Server started successfully. NLP and CV models will load on first use.")
     yield
-    # Cleanup
     global_models.clear()
+
+
+def get_nlp_model():
+    """Lazy-load NLP model on first request."""
+    if "nlp" not in global_models:
+        try:
+            logger.info("Lazy-loading DistilBERT NLP model...")
+            from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
+            model_path = "models/distilbert_fraud"
+            if os.path.isdir(model_path):
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                tokenizer = DistilBertTokenizer.from_pretrained(model_path)
+                model = DistilBertForSequenceClassification.from_pretrained(model_path)
+                model = model.to(device)
+                model.eval()
+                global_models["nlp"] = (model, tokenizer)
+        except Exception as e:
+            logger.error(f"Failed to load NLP model: {e}")
+    return global_models.get("nlp")
+
+
+def get_cv_model():
+    """Lazy-load CV model on first request."""
+    if "cv" not in global_models:
+        try:
+            logger.info("Lazy-loading SiameseResNet CV model...")
+            cv_path = "models/siamese_resnet18.pt"
+            if os.path.exists(cv_path):
+                device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+                # pretrained=False — weights come from the saved checkpoint, no internet download
+                model = SiameseResNet(embedding_dim=EMBEDDING_DIM, pretrained=False)
+                model.load_state_dict(torch.load(cv_path, map_location=device))
+                model = model.to(device)
+                model.eval()
+                global_models["cv"] = model
+        except Exception as e:
+            logger.error(f"Failed to load CV model: {e}")
+    return global_models.get("cv")
 
 app = FastAPI(title="AI Fraud Guard", lifespan=lifespan)
 
@@ -129,7 +137,12 @@ async def predict(
             transaction_features=features,
             transaction_text=text,
             signature_paths=signature_paths,
-            loaded_models=global_models
+            loaded_models={
+                **global_models,
+                # Inject lazy-loaded models only if actually needed
+                **({}  if not text else {"nlp": get_nlp_model()} if get_nlp_model() else {}),
+                **({}  if not signature_paths else {"cv": get_cv_model()} if get_cv_model() else {}),
+            }
         )
         
         # Cleanup temporary image files

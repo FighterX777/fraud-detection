@@ -199,10 +199,10 @@ class SiameseResNet(nn.Module):
         fine-tuning layer3 & layer4 on signature-specific high-level patterns.
     """
 
-    def __init__(self, embedding_dim: int = EMBEDDING_DIM):
+    def __init__(self, embedding_dim: int = EMBEDDING_DIM, pretrained: bool = True):
         super(SiameseResNet, self).__init__()
 
-        backbone = models.resnet18(pretrained=True)
+        backbone = models.resnet18(pretrained=pretrained)
 
         # Remove final FC classification head; keep feature extraction layers.
         self.feature_extractor = nn.Sequential(*list(backbone.children())[:-1])
